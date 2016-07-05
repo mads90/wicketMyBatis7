@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="wicketMyBatis7.dao.PersonaMapper">
+	<sql id="orderBy">
+		<if test="orderBy != null">
+  <![CDATA[ order by $orderBy$]]>
+		</if>
+	</sql>
+	<sql id="selectAll">
+		select 
+		COGNOME as cognome ,
+		COMUNENASCITA as comunenascita ,
+		DATADECESSO as dataDecesso ,
+		DATANASCITA as dataNascita ,
+		NOME as nome,
+		UNID as unid 
+		from PERSONA
+	</sql>
+	<sql id="condition">
+		WHERE 1=1
+		
+		<if test="cognomeLike != null ">
+			AND UPPER(COGNOME) Like UPPER(#{stringaCriterioLike}||'%')
+		</if>
+		  <if test="unid != null ">
+			AND UNID = #{unid}
+		</if>
+	</sql>
+	<insert id="insert">
+		insert into PERSONA (
+		COGNOME,
+		COMUNENASCITA,
+		DATADECESSO,
+		DATANASCITA,
+		NOME,
+		UNID
+		) VALUES (
+		#{cognome},
+		#{comunenascita},
+		#{datadecesso},
+		#{datanascita},
+		#{nome},
+		#{unid}
+		)
+		<selectKey resultType="String" keyProperty="unid" order="BEFORE">
+			select persona_seq.nextval as id from dual
+		</selectKey>
+	</insert>
+	<update id="update">
+		update PERSONA set
+		COGNOME = #{cognome},
+		COMUNENASCITA = #{comunenascita},
+		DATADECESSO = #{datadecesso},
+		DATANASCITA = #{datanascita},
+		NOME = #{nome},
+		UNID = #{unid}
+		WHERE 1=1
+		AND UNID = #{unid}
+	</update>
+	<delete id="delete">
+		delete from PERSONA
+		WHERE 1=1
+		AND UNID = #{unid}
+	</delete>
+	<select id="getAll" resultType="wicketMyBatis7.domain.Persona">
+		<include refid="selectAll" />
+</select>
+	<select id="loadAll" resultType="wicketMyBatis7.domain.Persona">
+	<include refid="selectAll"></include>
+	<choose>
+		<when test="criterio == 0">
+			WHERE UPPER(COGNOME) Like UPPER(#{stringaCriterioLike}||'%')
+		</when>
+		<when test="criterio == 1">
+			WHERE UPPER(NOME) Like UPPER(#{stringaCriterioLike}||'%')
+		</when>
+	</choose>
+	<include refid="orderBy"></include>
+</select>
+	<select id="count" parameterType="Integer" resultType="Integer">
+		SELECT COUNT(*)
+      	FROM PERSONA
+      	WHERE UPPER(COGNOME) Like UPPER(#{stringaCriterioLike}||'%')
+	
+		<!--  <include refid="selectAll" />
+		<include refid="condition" />
+		-->
+		
+	</select>
+</mapper>
+	
